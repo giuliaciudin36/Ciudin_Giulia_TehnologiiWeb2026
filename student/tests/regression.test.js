@@ -1,0 +1,24 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { loadDashboard } from "../public/dashboard.js";
+test("valorile sursă rămân neschimbate", async () => {
+  const profile = Object.freeze({ name: "Ada" }),
+    tasks = Object.freeze([Object.freeze({ status: "open" })]),
+    notices = Object.freeze(["n"]);
+  const map = {
+    "/data/profile.json": profile,
+    "/data/tasks.json": tasks,
+    "/data/notices.json": notices,
+  };
+  await loadDashboard({
+    fetchImpl: async (path) => ({
+      ok: true,
+      status: 200,
+      json: async () => map[path],
+    }),
+    render: () => {},
+  });
+  assert.equal(profile.name, "Ada");
+  assert.equal(tasks[0].status, "open");
+  assert.equal(notices[0], "n");
+});
